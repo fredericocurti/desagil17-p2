@@ -8,7 +8,7 @@ public class MuxGate extends Gate {
 
 	public MuxGate() {
 		super(3);
-
+		name="MUX";
 		nandLeft = new NandGate();
 
 		nandTop = new NandGate();

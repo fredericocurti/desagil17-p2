@@ -1,11 +1,11 @@
 package br.pro.hashi.ensino.desagil.lucianogic.model;
 
 public class NotGate extends Gate {
-	
 	private NandGate nandGate;
 
 	public NotGate() {
 		super(1);
+		name = "NOT";
 		nandGate = new NandGate();
 	}
 

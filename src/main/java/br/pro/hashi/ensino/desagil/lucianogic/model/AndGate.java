@@ -1,12 +1,13 @@
 package br.pro.hashi.ensino.desagil.lucianogic.model;
 
 public class AndGate extends Gate {
+
 	private NandGate nandLeft;
 	private NandGate nandRight;
 
 	public AndGate() {
 		super(2);
-
+		name = "AND";
 		nandLeft = new NandGate();
 
 		nandRight = new NandGate();

@@ -1,10 +1,11 @@
 package br.pro.hashi.ensino.desagil.lucianogic.model;
 
 public class NandGate extends Gate {
-	private Emitter[] emitters;
+	public Emitter[] emitters;
 
 	public NandGate() {
 		super(2);
+		name="NAND";
 		emitters = new Emitter[2];
 	}
 
