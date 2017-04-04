@@ -17,13 +17,19 @@ import javax.swing.JLabel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.util.concurrent.ThreadLocalRandom;
+
+
 
 import br.pro.hashi.ensino.desagil.lucianogic.model.Gate;
 import br.pro.hashi.ensino.desagil.lucianogic.model.Switch;
 import br.pro.hashi.ensino.desagil.lucianogic.model.LED;
 
 // Esta classe representa a interface de uma porta logica.
-public class GateView extends FixedPanel implements ItemListener,EventListener, ActionListener, MouseListener{
+public class GateView extends FixedPanel implements ItemListener,EventListener,ActionListener, MouseListener,ChangeListener{
 
 	// Necessario para serializar objetos desta classe.
 	private static final long serialVersionUID = 1L;
@@ -36,11 +42,11 @@ public class GateView extends FixedPanel implements ItemListener,EventListener, 
 	private Gate gate;
 	private JButton button;
 	private LED led;	
-	
+	private JSlider slider;
 	private Image image;
 
 	public GateView(Gate gate) {
-		super(290, 150);
+		super(230, 120);
 		
 		image = loadImage(gate.toString());
 		
@@ -52,6 +58,25 @@ public class GateView extends FixedPanel implements ItemListener,EventListener, 
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/label.html
 		JLabel inLabel = new JLabel("Entrada:");
 		JLabel outLabel = new JLabel("Saida:");
+
+		slider = new JSlider(JSlider.HORIZONTAL,0,100,0);
+		slider.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent e){
+				int newColor = slider.getValue();
+				float newColorfloat = newColor;
+				float[] hsv = new float[3];
+				Color.RGBtoHSB(led.getR(),led.getG(),led.getB(),hsv);
+				System.out.println(newColorfloat);
+				hsv[2] = newColorfloat;
+				int rgb = Color.HSBtoRGB(hsv[0], hsv[1], hsv[2]);
+			    int red = (rgb >> 16) & 0xFF;
+			    int green = (rgb >> 8) & 0xFF;
+			    int blue = rgb & 0xFF;
+				led = new LED(red,green,blue);
+				led.connect(gate, 0);
+				repaint();
+			}
+		});
 		
 		int size = gate.getSize();
 
@@ -85,24 +110,28 @@ public class GateView extends FixedPanel implements ItemListener,EventListener, 
 		/* A PARTIR DESTE PONTO VOCE DEVE ENTENDER SOZINHO */
 
 		add(inLabel);
+
 //		for(int i = 0; i < inBoxes.length; i++) {
 //			add(inBoxes[i], 10,5,1,25);
 //		}
 		
 		if(gate.getSize() == 1){
-			add(inBoxes[0], 10,15,17,17);
+			add(inBoxes[0], 8,15,21,17);
 		}
 		else if(gate.getSize() == 2){
-			add(inBoxes[0], 10,5,17,17);
-			add(inBoxes[1], 10,27,17,17);
+			add(inBoxes[0], 8,5,21,17);
+			add(inBoxes[1], 8,27,21,17);
 		}
 		else{
-			add(inBoxes[0], 10,5,17,17);
-			add(inBoxes[1], 10,26,17,17);
-			add(inBoxes[2], 10,47,17,17);			
+			add(inBoxes[0], 8 ,5,21,17);
+			add(inBoxes[1], 8,26,21,17);
+			add(inBoxes[2], 8,47,21,17);
 		}
 
 		add(outLabel);
+        slider.setMajorTickSpacing(1);
+        slider.setMinorTickSpacing(1);
+		add(slider,80,80,100,50);
 //		add(outBox,160,25,50,25);
 		
 		led.connect(gate, 0);
@@ -150,18 +179,29 @@ public class GateView extends FixedPanel implements ItemListener,EventListener, 
 ////		getToolkit().sync();
 //	}
 	@Override
-	public void paintComponent(Graphics g) {	
-		g.drawImage(image, 27,0,image.getWidth(outBox),image.getHeight(outBox), null);
-		if(led.isOn()){
-			g.setColor(new Color(led.getR(),led.getG(),led.getB()));
-			g.fillOval(117, 17, 15, 15);
-		}
-		else{
-			g.drawOval(117, 17, 15, 15);
-		}
-		getToolkit().sync();
-	}
-
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.drawImage(image, 27,0,image.getWidth(outBox),image.getHeight(outBox), null);
+        if(led.isOn()){
+            g.setColor(new Color(led.getR(),led.getG(),led.getB()));
+            g.fillOval(117, 17, 15, 15);
+            for (double theta = 0; theta <= 2*Math.PI; theta += Math.PI/6){
+                double x1 = (10)*Math.cos(theta)+125;
+                double y1 = (10)*Math.sin(theta)+24;
+                double x2 = (25)*Math.cos(theta)+125;
+                double y2 = (25)*Math.sin(theta)+24;
+                int xi = (int) x1;
+                int xf = (int) x2;
+                int yi = (int) y1;
+                int yf = (int) y2;
+                g.drawLine(xi, yi, xf, yf);
+        }
+        }
+        else{
+            g.drawOval(117, 17, 15, 15);
+        }
+        getToolkit().sync();
+    }
 	@Override
 	public void mousePressed(MouseEvent e) {
 		if (e.getX() < 130 && e.getX() > 115){
@@ -184,6 +224,10 @@ public class GateView extends FixedPanel implements ItemListener,EventListener, 
 	@Override
 	public void mouseExited(MouseEvent e) {
 		
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {		
 	}
 
 }
