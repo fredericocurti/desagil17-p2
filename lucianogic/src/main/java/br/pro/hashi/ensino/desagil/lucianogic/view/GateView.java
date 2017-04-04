@@ -4,26 +4,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.URL;
+import java.util.EventListener;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JTextField;
 
 import br.pro.hashi.ensino.desagil.lucianogic.model.Gate;
 import br.pro.hashi.ensino.desagil.lucianogic.model.Switch;
 import br.pro.hashi.ensino.desagil.lucianogic.model.LED;
 
 // Esta classe representa a interface de uma porta logica.
-public class GateView extends FixedPanel implements ItemListener, ActionListener {
+public class GateView extends FixedPanel implements ItemListener,EventListener, ActionListener, MouseListener{
 
 	// Necessario para serializar objetos desta classe.
 	private static final long serialVersionUID = 1L;
@@ -35,9 +35,9 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 	private Switch[] switches;
 	private Gate gate;
 	private JButton button;
+	private LED led;	
 	
 	private Image image;
-	
 
 	public GateView(Gate gate) {
 		super(290, 150);
@@ -45,6 +45,8 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 		image = loadImage(gate.toString());
 		
 		this.gate = gate;
+		
+		this.addMouseListener(this);
 		
 		// A componente JLabel representa simplesmente um texto fixo.
 		// https://docs.oracle.com/javase/tutorial/uiswing/components/label.html
@@ -54,8 +56,9 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 		int size = gate.getSize();
 
 		inBoxes = new JCheckBox[size];
-
 		switches = new Switch[size];
+
+		led = new LED(255, 0, 0);
 
 		for(int i = 0; i < size; i++) {
 			inBoxes[i] = new JCheckBox();
@@ -74,7 +77,7 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 
 		// Esta linha garante que outBox nao seja clicavel.
 		outBox.setEnabled(false);
-
+		
 		// Esta linha garante que os componentes sejam simplesmente
 		// colocados em linha reta, mais especificamente na vertical.
 //		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -101,14 +104,9 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 
 		add(outLabel);
 //		add(outBox,160,25,50,25);
-
 		
-		button = new JButton();
-		button.setOpaque(true);
-		button.addActionListener(this);
+		led.connect(gate, 0);
 		
-		
-		add(button, 117, 20, 10, 10);
 	}
 
 	@Override
@@ -120,6 +118,7 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 			}
 		}
 		switches[i].setOn(inBoxes[i].isSelected());
+		this.repaint();
 	}
 	
 	@Override
@@ -127,7 +126,7 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 		Color color = JColorChooser.showDialog(this, null, null);
 
 		if(color != null) {
-			button.setBackground(color);
+			led = new LED (color.getRed(),color.getGreen(),color.getBlue());
 		}
 	}
 
@@ -137,12 +136,54 @@ public class GateView extends FixedPanel implements ItemListener, ActionListener
 		return icon.getImage();
 	}
 	
+	public void mouseClicked(MouseEvent e){
+	}
 	
+	public void mouseReleased(MouseEvent e){
+		System.out.println("Mouse released");
+		}
+//	@Override
+//	public void paintComponent(Graphics g) {
+//		g.drawImage(image, 27,0,image.getWidth(outBox),image.getHeight(outBox), null);
+//	
+//		// Evita bugs visuais em alguns sistemas operacionais.
+////		getToolkit().sync();
+//	}
 	@Override
-	public void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {	
 		g.drawImage(image, 27,0,image.getWidth(outBox),image.getHeight(outBox), null);
-	
-		// Evita bugs visuais em alguns sistemas operacionais.
+		if(led.isOn()){
+			g.setColor(new Color(led.getR(),led.getG(),led.getB()));
+			g.fillOval(117, 17, 15, 15);
+		}
+		else{
+			g.drawOval(117, 17, 15, 15);
+		}
 		getToolkit().sync();
 	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (e.getX() < 130 && e.getX() > 115){
+			Color color = JColorChooser.showDialog(this, null, null);
+
+			if(color != null) {
+				led = new LED (color.getRed(),color.getGreen(),color.getBlue());
+				led.connect(gate, 0);
+				this.repaint();
+			}
+			
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		
+	}
+
 }

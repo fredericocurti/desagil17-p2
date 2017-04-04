@@ -23,9 +23,9 @@ public class Main {
 
             	// Cria o modelo.
             	List<Gate> model = new LinkedList<>();
+            	model.add(new OrGate());
             	model.add(new NandGate());
             	model.add(new NotGate());
-            	model.add(new OrGate());
             	model.add(new AndGate());
             	model.add(new XorGate());
             	model.add(new MuxGate());
